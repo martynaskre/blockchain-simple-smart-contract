@@ -1,3 +1,5 @@
+const { assert } = require("@vue/compiler-core");
+
 const Lottery = artifacts.require('./Lottery.sol');
 
 contract('Lottery', (accounts) => {
@@ -74,7 +76,9 @@ contract('Lottery', (accounts) => {
                     value: web3.utils.toWei('0.1', 'ether')
                 });
 
-                assert.notEqual(await instance.winner(), '0x0000000000000000000000000000000000000000');
+                const pastEvents = await instance.getPastEvents();
+
+                assert(pastEvents.filter((event) => event.event === 'WinnerSelected').length === 1);
 
                 done();
             });
@@ -87,8 +91,6 @@ contract('Lottery', (accounts) => {
                 await instance.resetLottery.call({
                     from: manager,
                 });
-
-                assert.equal(await instance.winner(), '0x0000000000000000000000000000000000000000');
 
                 done();
             });
